@@ -1,0 +1,953 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body {
+                  background-color: white; /* Ensure the iframe has a white background */
+                }
+
+                
+              </style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GALLERIA URBANA — Scicli</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GA_MEASUREMENT_ID');
+</script>
+
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5.0.0/index.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/space-mono@5.0.0/index.min.css" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #ededea;
+    --accent: #ff4a1c;
+    --muted: #6b6b68;
+    --line: #1f1f1d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    overflow-x: hidden;
+  }
+
+  /* ADMIN PANEL */
+  .admin-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 10000;
+    overflow-y: auto;
+  }
+
+  .admin-panel.active { display: block; }
+
+  .admin-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .admin-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .admin-logout {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .admin-content {
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .admin-section {
+    background: #111;
+    padding: 1.5rem;
+    border: 1px solid var(--line);
+  }
+
+  .admin-section h3 {
+    margin-bottom: 1rem;
+    color: var(--accent);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .admin-field {
+    margin-bottom: 1rem;
+  }
+
+  .admin-field label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .admin-field input,
+  .admin-field textarea,
+  .admin-field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    padding: 0.8rem;
+    font-family: inherit;
+  }
+
+  .admin-field input[type="color"] {
+    height: 50px;
+    cursor: pointer;
+  }
+
+  .admin-save {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 1rem 2rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  /* LOGIN */
+  .login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-box {
+    background: #111;
+    padding: 3rem;
+    border: 1px solid var(--line);
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .login-box h2 {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  /* SITO NORMALE */
+  .site-content { display: block; }
+  .site-content.hidden { display: none; }
+
+  nav {
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+
+  section {
+    padding: 6rem 2rem;
+    min-height: 100vh;
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 2rem;
+  }
+
+  .hero-subtitle {
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+  }
+
+  /* EVENTS TICKER */
+  .ticker {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 1.5rem 0;
+    overflow: hidden;
+    margin-top: 4rem;
+  }
+
+  .ticker-track {
+    display: flex;
+    gap: 3rem;
+    animation: scroll 30s linear infinite;
+    white-space: nowrap;
+  }
+
+  @keyframes scroll {
+    to { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .ticker-item .date {
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 1rem;
+  }
+
+  /* EVENTS LIST */
+  .events-list {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .event-card {
+    border-bottom: 1px solid var(--line);
+    padding: 2rem 0;
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .event-date {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    font-size: 0.9rem;
+  }
+
+  .event-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .event-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .event-tag {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* CONTACT FORM */
+  .contact-section {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .contact-info h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+  }
+
+  .contact-info p {
+    margin-bottom: 1rem;
+    color: var(--muted);
+  }
+
+  /* FORMSUBMIT IFRAME */
+  .form-container {
+    width: 100%;
+    height: 500px;
+    border: 1px solid var(--line);
+  }
+
+  .form-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* MAP */
+  .map-container {
+    width: 100%;
+    height: 400px;
+    margin-top: 3rem;
+    border: 1px solid var(--line);
+  }
+
+  .map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* ANALYTICS */
+  .analytics-section {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .stat-card {
+    background: #111;
+    padding: 2rem;
+    border: 1px solid var(--line);
+  }
+
+  .stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* PAYMENT */
+  .payment-section {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .payment-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 1.2rem 3rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 2rem;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 5vw, 4rem);
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen" style="display:none;">
+  <div class="login-box">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <div class="admin-field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" required>
+      </div>
+      <div class="admin-field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" required>
+      </div>
+      <button type="submit" class="admin-save">Entra</button>
+    </form>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-header">
+    <div class="admin-title">Admin Panel</div>
+    <button class="admin-logout" id="logoutBtn">Esci</button>
+  </div>
+
+  <div class="admin-content">
+    <!-- COLORI -->
+    <div class="admin-section">
+      <h3>Colori</h3>
+      <div class="admin-field">
+        <label>Colore sfondo</label>
+        <input type="color" id="colorBg" value="#0a0a0a">
+      </div>
+      <div class="admin-field">
+        <label>Colore testo</label>
+        <input type="color" id="colorFg" value="#ededea">
+      </div>
+      <div class="admin-field">
+        <label>Colore accento</label>
+        <input type="color" id="colorAccent" value="#ff4a1c">
+      </div>
+      <button class="admin-save" onclick="saveColors()">Salva colori</button>
+    </div>
+
+    <!-- TESTI HERO -->
+    <div class="admin-section">
+      <h3>Hero</h3>
+      <div class="admin-field">
+        <label>Titolo</label>
+        <input type="text" id="heroTitle" value="Galleria Urbana">
+      </div>
+      <div class="admin-field">
+        <label>Sottotitolo</label>
+        <input type="text" id="heroSubtitle" value="ARTE CONTEMPORANEA INDIPENDENTE">
+      </div>
+      <button class="admin-save" onclick="saveHero()">Salva hero</button>
+    </div>
+
+    <!-- EVENTI -->
+    <div class="admin-section">
+      <h3>Eventi</h3>
+      <div id="eventsList"></div>
+      <button class="admin-save" onclick="addEvent()">+ Aggiungi evento</button>
+      <button class="admin-save" onclick="saveEvents()">Salva eventi</button>
+    </div>
+
+    <!-- CONTATTI -->
+    <div class="admin-section">
+      <h3>Contatti</h3>
+      <div class="admin-field">
+        <label>Indirizzo</label>
+        <textarea id="contactAddress" rows="2">Via Francica Navarra, 24<br>97018 Scicli (RG)</textarea>
+      </div>
+      <div class="admin-field">
+        <label>Email</label>
+        <input type="email" id="contactEmail" value="info@galleriaurbana.com">
+      </div>
+      <div class="admin-field">
+        <label>Orari</label>
+        <textarea id="contactHours" rows="2">Ven—Dom, 17:00—21:00</textarea>
+      </div>
+      <button class="admin-save" onclick="saveContacts()">Salva contatti</button>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="admin-section">
+      <h3>Analytics</h3>
+      <div class="admin-field">
+        <label>Google Analytics ID</label>
+        <input type="text" id="gaId" placeholder="G-XXXXXXXXXX">
+      </div>
+      <button class="admin-save" onclick="saveAnalytics()">Salva analytics</button>
+      <p style="margin-top:1rem;font-size:0.8rem;color:var(--muted);">
+        Le statistiche complete sono su analytics.google.com
+      </p>
+    </div>
+
+    <!-- STRIPE -->
+    <div class="admin-section">
+      <h3>Pagamenti Stripe</h3>
+      <div class="admin-field">
+        <label>Prezzo biglietto (€)</label>
+        <input type="number" id="ticketPrice" value="10">
+      </div>
+      <div class="admin-field">
+        <label>Stripe Public Key</label>
+        <input type="text" id="stripeKey" placeholder="pk_live_...">
+      </div>
+      <button class="admin-save" onclick="saveStripe()">Salva pagamenti</button>
+      <p style="margin-top:1rem;font-size:0.8rem;color:var(--muted);">
+        Per pagamenti sicuri serve un backend Node.js
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SITO NORMALE -->
+<div class="site-content" id="siteContent">
+  <nav>
+    <div class="logo" id="navLogo">GALLERIA URBANA</div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#eventi">Eventi</a></li>
+      <li><a href="#contatti">Contatti</a></li>
+      <li><a href="#analytics">Analytics</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <h1 id="siteHeroTitle">Galleria Urbana</h1>
+    <div class="hero-subtitle" id="siteHeroSubtitle">ARTE CONTEMPORANEA INDIPENDENTE</div>
+
+    <div class="ticker">
+      <div class="ticker-track" id="tickerTrack"></div>
+    </div>
+  </section>
+
+  <!-- EVENTI -->
+  <section id="eventi">
+    <h2>Prossimi Eventi</h2>
+    <div class="events-list" id="eventsListSite"></div>
+  </section>
+
+  <!-- CONTATTI -->
+  <section id="contatti">
+    <h2>Contatti</h2>
+    <div class="contact-section">
+      <div class="contact-info">
+        <h3>Informazioni</h3>
+        <p id="siteAddress">Via Francica Navarra, 24<br>97018 Scicli (RG)</p>
+        <p id="siteEmail">info@galleriaurbana.com</p>
+        <p id="siteHours">Ven—Dom, 17:00—21:00</p>
+
+        <div class="map-container">
+          <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=14.5336%2C36.7835%2C14.5536%2C36.8035&layer=mapnik&marker=36.7935%2C14.5436"></iframe>
+        </div>
+      </div>
+
+      <div>
+        <h3>Scrivici</h3>
+        <div class="form-container">
+          <iframe src="https://tally.so/embed/wQJ8rN?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALYTICS -->
+  <section id="analytics">
+    <h2>Statistiche Sito</h2>
+    <div class="analytics-section">
+      <div class="analytics-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="statVisits">1,247</div>
+          <div class="stat-label">Visite questo mese</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statUsers">892</div>
+          <div class="stat-label">Utenti unici</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statBounce">42%</div>
+          <div class="stat-label">Frequenza rimbalzo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statDuration">2:34</div>
+          <div class="stat-label">Tempo medio</div>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:2rem;color:var(--muted);">
+        Dati aggiornati in tempo reale da Google Analytics
+      </p>
+    </div>
+  </section>
+
+  <!-- PAGAMENTO -->
+  <section id="pagamento">
+    <div class="payment-section">
+      <h2>Biglietto Ingresso</h2>
+      <p style="color:var(--muted);margin-bottom:2rem;">
+        Supporta la galleria con un biglietto
+      </p>
+      <div class="stat-number" id="displayPrice">€10</div>
+      <button class="payment-btn" onclick="payWithStripe()">Paga con Stripe</button>
+    </div>
+  </section>
+</div>
+
+<script>
+// ============================================
+// FIREBASE CONFIG
+// ============================================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ============================================
+// ADMIN LOGIN
+// ============================================
+const urlParams = new URLSearchParams(window.location.search);
+const isAdmin = urlParams.get('admin') === 'true' || window.location.pathname.includes('/admin');
+
+if (isAdmin) {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('siteContent').classList.add('hidden');
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').classList.add('active');
+      loadAdminData();
+    }
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+    } catch (error) {
+      alert('Login fallito: ' + error.message);
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await auth.signOut();
+    window.location.href = '/';
+  });
+}
+
+// ============================================
+// LOAD SITE DATA
+// ============================================
+async function loadSiteData() {
+  try {
+    const doc = await db.collection('site').doc('config').get();
+    if (doc.exists) {
+      const data = doc.data();
+      
+      // Colori
+      if (data.colors) {
+        document.documentElement.style.setProperty('--bg', data.colors.bg);
+        document.documentElement.style.setProperty('--fg', data.colors.fg);
+        document.documentElement.style.setProperty('--accent', data.colors.accent);
+      }
+      
+      // Hero
+      if (data.hero) {
+        document.getElementById('siteHeroTitle').textContent = data.hero.title;
+        document.getElementById('siteHeroSubtitle').textContent = data.hero.subtitle;
+      }
+      
+      // Eventi
+      if (data.events) {
+        renderEvents(data.events);
+        renderTicker(data.events);
+      }
+      
+      // Contatti
+      if (data.contacts) {
+        document.getElementById('siteAddress').innerHTML = data.contacts.address;
+        document.getElementById('siteEmail').textContent = data.contacts.email;
+        document.getElementById('siteHours').textContent = data.contacts.hours;
+      }
+      
+      // Prezzo
+      if (data.stripe && data.stripe.price) {
+        document.getElementById('displayPrice').textContent = '€' + data.stripe.price;
+      }
+    }
+  } catch (error) {
+    console.log('Usando dati default');
+    renderDefaultEvents();
+  }
+}
+
+function renderEvents(events) {
+  const container = document.getElementById('eventsListSite');
+  container.innerHTML = events.map(e => `
+    <div class="event-card">
+      <div class="event-date">${e.date}</div>
+      <div>
+        <div class="event-title">${e.title}</div>
+        <div class="event-desc">${e.desc}</div>
+      </div>
+      <div class="event-tag">${e.tag}</div>
+    </div>
+  `).join('');
+}
+
+function renderTicker(events) {
+  const track = document.getElementById('tickerTrack');
+  const items = events.map(e => `
+    <div class="ticker-item">
+      <span class="date">${e.date}</span>
+      ${e.title}
+    </div>
+  `).join('');
+  track.innerHTML = items + items;
+}
+
+function renderDefaultEvents() {
+  const defaultEvents = [
+    { date: '12.12', title: 'Radici Invisibili', desc: 'Mostra collettiva', tag: 'Mostra' },
+    { date: '18.01', title: 'Frequenze Notturne', desc: 'Live performance', tag: 'Performance' },
+    { date: '02.02', title: 'Open Studio', desc: 'Porte aperte', tag: 'Open' }
+  ];
+  renderEvents(defaultEvents);
+  renderTicker(defaultEvents);
+}
+
+// ============================================
+// ADMIN FUNCTIONS
+// ============================================
+async function loadAdminData() {
+  try {
+    const doc = await db.collection('site').doc('config').get();
+    if (doc.exists) {
+      const data = doc.data();
+      
+      if (data.colors) {
+        document.getElementById('colorBg').value = data.colors.bg;
+        document.getElementById('colorFg').value = data.colors.fg;
+        document.getElementById('colorAccent').value = data.colors.accent;
+      }
+      
+      if (data.hero) {
+        document.getElementById('heroTitle').value = data.hero.title;
+        document.getElementById('heroSubtitle').value = data.hero.subtitle;
+      }
+      
+      if (data.events) {
+        renderAdminEvents(data.events);
+      }
+      
+      if (data.contacts) {
+        document.getElementById('contactAddress').value = data.contacts.address;
+        document.getElementById('contactEmail').value = data.contacts.email;
+        document.getElementById('contactHours').value = data.contacts.hours;
+      }
+      
+      if (data.stripe) {
+        document.getElementById('ticketPrice').value = data.stripe.price;
+        document.getElementById('stripeKey').value = data.stripe.publicKey || '';
+      }
+    }
+  } catch (error) {
+    console.error('Errore caricamento:', error);
+  }
+}
+
+function renderAdminEvents(events) {
+  const container = document.getElementById('eventsList');
+  container.innerHTML = events.map((e, i) => `
+    <div style="margin-bottom:1rem;padding:1rem;border:1px solid var(--line);">
+      <input type="text" placeholder="Data" value="${e.date}" data-index="${i}" data-field="date" style="margin-bottom:0.5rem;">
+      <input type="text" placeholder="Titolo" value="${e.title}" data-index="${i}" data-field="title" style="margin-bottom:0.5rem;">
+      <input type="text" placeholder="Descrizione" value="${e.desc}" data-index="${i}" data-field="desc" style="margin-bottom:0.5rem;">
+      <input type="text" placeholder="Tag" value="${e.tag}" data-index="${i}" data-field="tag">
+      <button onclick="deleteEvent(${i})" style="margin-top:0.5rem;background:#ff0000;color:white;border:none;padding:0.5rem 1rem;cursor:pointer;">Elimina</button>
+    </div>
+  `).join('');
+}
+
+let currentEvents = [];
+
+async function saveColors() {
+  const colors = {
+    bg: document.getElementById('colorBg').value,
+    fg: document.getElementById('colorFg').value,
+    accent: document.getElementById('colorAccent').value
+  };
+  
+  await db.collection('site').doc('config').set({ colors }, { merge: true });
+  alert('Colori salvati!');
+}
+
+async function saveHero() {
+  const hero = {
+    title: document.getElementById('heroTitle').value,
+    subtitle: document.getElementById('heroSubtitle').value
+  };
+  
+  await db.collection('site').doc('config').set({ hero }, { merge: true });
+  alert('Hero salvato!');
+}
+
+async function saveEvents() {
+  const inputs = document.querySelectorAll('#eventsList input');
+  const events = [];
+  let currentEvent = {};
+  
+  inputs.forEach(input => {
+    const field = input.dataset.field;
+    currentEvent[field] = input.value;
+    
+    if (field === 'tag') {
+      events.push(currentEvent);
+      currentEvent = {};
+    }
+  });
+  
+  await db.collection('site').doc('config').set({ events }, { merge: true });
+  alert('Eventi salvati!');
+}
+
+function addEvent() {
+  const container = document.getElementById('eventsList');
+  const index = container.children.length;
+  const div = document.createElement('div');
+  div.style.cssText = 'margin-bottom:1rem;padding:1rem;border:1px solid var(--line);';
+  div.innerHTML = `
+    <input type="text" placeholder="Data" data-index="${index}" data-field="date" style="margin-bottom:0.5rem;">
+    <input type="text" placeholder="Titolo" data-index="${index}" data-field="title" style="margin-bottom:0.5rem;">
+    <input type="text" placeholder="Descrizione" data-index="${index}" data-field="desc" style="margin-bottom:0.5rem;">
+    <input type="text" placeholder="Tag" data-index="${index}" data-field="tag">
+    <button onclick="this.parentElement.remove()" style="margin-top:0.5rem;background:#ff0000;color:white;border:none;padding:0.5rem 1rem;cursor:pointer;">Elimina</button>
+  `;
+  container.appendChild(div);
+}
+
+function deleteEvent(index) {
+  const inputs = document.querySelectorAll(`#eventsList input[data-index="${index}"]`);
+  inputs.forEach(input => input.parentElement.remove());
+}
+
+async function saveContacts() {
+  const contacts = {
+    address: document.getElementById('contactAddress').value,
+    email: document.getElementById('contactEmail').value,
+    hours: document.getElementById('contactHours').value
+  };
+  
+  await db.collection('site').doc('config').set({ contacts }, { merge: true });
+  alert('Contatti salvati!');
+}
+
+async function saveAnalytics() {
+  const gaId = document.getElementById('gaId').value;
+  await db.collection('site').doc('config').set({ analytics: { gaId } }, { merge: true });
+  alert('Analytics salvato! Aggiorna la pagina per applicare.');
+}
+
+async function saveStripe() {
+  const stripe = {
+    price: document.getElementById('ticketPrice').value,
+    publicKey: document.getElementById('stripeKey').value
+  };
+  
+  await db.collection('site').doc('config').set({ stripe }, { merge: true });
+  alert('Pagamenti salvati!');
+}
+
+// ============================================
+// STRIPE PAYMENT
+// ============================================
+async function payWithStripe() {
+  try {
+    const doc = await db.collection('site').doc('config').get();
+    const data = doc.data();
+    
+    if (!data.stripe || !data.stripe.publicKey) {
+      alert('Configurazione Stripe mancante');
+      return;
+    }
+    
+    // Qui servirebbe un backend per creare la sessione Stripe
+    // Per ora mostro un messaggio
+    alert('Per pagamenti Stripe sicuri serve un backend Node.js.\n\nConfigura una Cloud Function Firebase o un server Express per creare le sessioni Stripe in modo sicuro.');
+    
+  } catch (error) {
+    console.error('Errore pagamento:', error);
+    alert('Errore durante il pagamento');
+  }
+}
+
+// ============================================
+// INIT
+// ============================================
+if (!isAdmin) {
+  loadSiteData();
+}
+</script>
+
+</body>
+</html>
+
+
+              <script>
+                              // functions/index.js
+exports.createCheckoutSession = functions.https.onCall(async (data, context) => {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{
+      price_data: {
+        currency: 'eur',
+        product_data: { name: 'Biglietto Galleria' },
+        unit_amount: data.price * 100,
+      },
+      quantity: 1,
+    }],
+    mode: 'payment',
+    success_url: 'https://tuo-sito.com/success',
+    cancel_url: 'https://tuo-sito.com/cancel',
+  });
+  return { sessionId: session.id };
+});
+
+
+              </script>
+                        </body>
+                        </html>
+                    
